@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>胜意卦</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="number"]#height {
+            width: 200px;
+            padding: 15px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 10px auto;
+            display: block;
+        }
+        input[type="number"]#height:focus {
+            outline: none;
+            border-color: #45a049;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 30px;
+            display: none;
+        }
+        .hexagram {
+            text-align: center;
+            font-family: monospace;
+            margin: 20px 0;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+        }
+        .hexagram-column {
+            display: flex;
+            flex-direction: column;
+        }
+        .hexagram-title {
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        .hexagram-line {
+            margin: 5px 0;
+            white-space: pre;
+        }
+        .info-group {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .info-group h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .loading {
+            text-align: center;
+            display: none;
+            padding: 20px;
+        }
+        .coin-animation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .coin {
+            width: 50px;
+            height: 50px;
+            background: #FFD700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #B8860B;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            animation: flip 1s ease-in-out infinite;
+        }
+        @keyframes flip {
+            0% {
+                transform: rotateX(0deg) rotateY(0deg);
+                background: #FFD700;
+            }
+            50% {
+                transform: rotateX(180deg) rotateY(180deg);
+                background: #DAA520;
+            }
+            100% {
+                transform: rotateX(360deg) rotateY(360deg);
+                background: #FFD700;
+            }
+        }
+        .coin:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .coin:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        .divination-text {
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #666;
+            animation: fadeInOut 2s ease-in-out infinite;
+        }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        .changing-lines {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #fff3e0;
+            border-radius: 4px;
+        }
+        .changing-lines h3 {
+            margin: 0 0 10px 0;
+            color: #e65100;
+        }
+        .note {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .optional-label::after {
+            content: '（选填）';
+            color: #999;
+            font-size: 0.9em;
+            margin-left: 5px;
+        }
+        .color-recommendation {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .color-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 10px auto;
+            border: 3px solid #ddd;
+        }
+        .luck-meter {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .luck-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            transition: width 1s ease-in-out;
+        }
+        .color-info {
+            text-align: center;
+            margin: 10px 0;
+        }
+        .color-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .nav-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+            background-color: #f8f8f8;
+        }
+        .nav-tab:hover {
+            background-color: #f0f0f0;
+        }
+        .nav-tab.active {
+            background-color: white;
+            border-color: #ddd;
+            border-bottom-color: white;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* 答案之书样式 */
+        .book-container {
+            text-align: center;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .book-answer {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2c3e50;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .book-answer.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .confidence-meter {
+            width: 100%;
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .confidence-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .confidence-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                rgba(255,255,255,0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255,255,255,0.2) 50%,
+                rgba(255,255,255,0.2) 75%,
+                transparent 75%,
+                transparent
+            );
+            background-size: 15px 15px;
+            animation: move 1s linear infinite;
+        }
+        @keyframes move {
+            0% { background-position: 0 0; }
+            100% { background-position: 15px 0; }
+        }
+        .suggestion {
+            color: #666;
+            font-style: italic;
+            margin: 10px 0;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition-delay: 0.3s;
+        }
+        .suggestion.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .book-animation {
+            font-size: 48px;
+            margin: 20px 0;
+            animation: pulse 1s infinite;
+            transition: transform 0.3s ease;
+        }
+        .book-animation:hover {
+            transform: scale(1.1);
+            cursor: pointer;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .magic-sparkle {
+            position: absolute;
+            pointer-events: none;
+            animation: sparkle 1s linear forwards;
+        }
+        @keyframes sparkle {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        .nav-tab {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .nav-tab:hover {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>胜意卦</h1>
+        
+        <div class="nav-tabs">
+            <a href="/divine" class="nav-tab {% if active_tab == 'divination' %}active{% endif %}" data-tab="divination">算卦</a>
+            <a href="/color" class="nav-tab {% if active_tab == 'color' %}active{% endif %}" data-tab="color">今日颜色</a>
+            <a href="/height" class="nav-tab {% if active_tab == 'height' %}active{% endif %}" data-tab="height">身高计算</a>
+            <a href="/book" class="nav-tab {% if active_tab == 'book' %}active{% endif %}" data-tab="book">答案之书</a>
+        </div>
+
+        <div id="divinationForm" class="tab-content" {% if active_tab != 'divination' %}style="display: none;"{% endif %}>
+            <div class="form-group">
+                <label for="name" class="optional-label">姓名</label>
+                <input type="text" id="name" placeholder="请输入您的姓名">
+            </div>
+            <div class="form-group">
+                <label for="question" class="optional-label">求卦问题</label>
+                <textarea id="question" rows="3" placeholder="请输入您想问的问题"></textarea>
+            </div>
+            <button onclick="divine()">开始算卦</button>
+            
+            <div class="loading" id="loading">
+                <div class="coin-animation">
+                    <div class="coin">阴</div>
+                    <div class="coin">阳</div>
+                    <div class="coin">卦</div>
+                </div>
+                <div class="divination-text">正在演算卦象，请心诚默念...</div>
+            </div>
+
+            <div id="result">
+                <div class="hexagram">
+                    <div class="hexagram-column">
+                        <div class="hexagram-title">本卦</div>
+                        <div id="hexagram"></div>
+                    </div>
+                    <div class="hexagram-column" id="future-hexagram-container" style="display: none;">
+                        <div class="hexagram-title">变卦</div>
+                        <div id="future-hexagram"></div>
+                    </div>
+                </div>
+                <div class="info-group">
+                    <h3>卦名</h3>
+                    <p id="name-result"></p>
+                </div>
+                <div class="info-group" id="question-group" style="display: none;">
+                    <h3>求问</h3>
+                    <p id="question-result"></p>
+                </div>
+                <div class="changing-lines" id="changing-lines" style="display: none;">
+                    <h3>变爻</h3>
+                    <p id="changing-lines-text"></p>
+                    <p class="note">注：○表示阴爻变阳，×表示阳爻变阴</p>
+                </div>
+                <div class="info-group">
+                    <h3>卦意</h3>
+                    <p id="meaning"></p>
+                </div>
+                <div class="info-group">
+                    <h3>解释</h3>
+                    <p id="description"></p>
+                </div>
+                <div class="info-group">
+                    <h3>吉凶</h3>
+                    <p id="fortune"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="colorForm" class="tab-content" {% if active_tab != 'color' %}style="display: none;"{% endif %}>
+            <div class="color-recommendation">
+                <div class="form-group">
+                    <label for="color-name" class="optional-label">姓名</label>
+                    <input type="text" id="color-name" placeholder="请输入您的姓名">
+                </div>
+                <button onclick="getPersonalizedColor()" style="margin-bottom: 20px;">获取个性化颜色推荐</button>
+                
+                <div id="color-result" style="display: none;">
+                    <h2 style="text-align: center; color: #333;">今日穿衣颜色</h2>
+                    <div class="color-preview" id="colorPreview"></div>
+                    <div class="color-info">
+                        <div class="color-name" id="colorName"></div>
+                        <p id="colorDescription"></p>
+                    </div>
+                    <div>
+                        <p style="text-align: center;">今日幸运指数</p>
+                        <div class="luck-meter">
+                            <div class="luck-bar" id="luckBar"></div>
+                        </div>
+                        <p style="text-align: center;" id="luckIndex"></p>
+                    </div>
+                    <div class="info-group">
+                        <h3>对应卦象</h3>
+                        <p id="colorHexagram"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="heightForm" class="tab-content" {% if active_tab != 'height' %}style="display: none;"{% endif %}>
+            <div class="form-group">
+                <label for="height">身高（厘米）</label>
+                <input type="number" id="height" step="0.1" placeholder="请输入您的身高">
+            </div>
+            <button onclick="calculateHeight()">计算</button>
+            <div id="height-result" style="display: none; margin-top: 20px;">
+                <div class="info-group">
+                    <h3>您的身高为：</h3>
+                    <p style="font-size: 28px; text-align: center; color: #4CAF50;"><span id="rounded-height"></span> 厘米</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="bookTab" class="tab-content" {% if active_tab != 'book' %}style="display: none;"{% endif %}>
+            <div class="form-group">
+                <label for="bookQuestion">请输入你的问题</label>
+                <textarea id="bookQuestion" rows="3" placeholder="例如：我今天应该去散步吗？"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="bookName" class="optional-label">你的名字</label>
+                <input type="text" id="bookName" placeholder="输入你的名字（选填）">
+            </div>
+            <button onclick="getBookAnswer()">获取答案</button>
+
+            <div id="bookResult" class="book-container" style="display: none;">
+                <div class="book-animation">📖</div>
+                <div class="book-answer"></div>
+                <div class="confidence-meter">
+                    <div class="confidence-bar"></div>
+                </div>
+                <div class="suggestion"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let animationTimeout;
+
+        async function divine() {
+            const name = document.getElementById('name').value;
+            const question = document.getElementById('question').value;
+
+            // 显示加载动画
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+
+            // 确保动画至少显示3秒
+            animationTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(window.location.origin + '/divine', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            name: name || undefined,
+                            question: question || undefined
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        // 显示本卦
+                        const hexagramDiv = document.getElementById('hexagram');
+                        hexagramDiv.innerHTML = data.yao_symbols.map(line => 
+                            `<div class="hexagram-line">${line}</div>`
+                        ).join('');
+
+                        // 显示变爻信息
+                        const changingLinesDiv = document.getElementById('changing-lines');
+                        if (data.changing_lines && data.changing_lines.length > 0) {
+                            changingLinesDiv.style.display = 'block';
+                            const changingLinesText = data.changing_lines
+                                .map(line => `第${line}爻`)
+                                .join('、');
+                            document.getElementById('changing-lines-text').textContent = 
+                                `${changingLinesText} 有变，${data.name}卦变${data.future_name}卦`;
+                        } else {
+                            changingLinesDiv.style.display = 'none';
+                        }
+
+                        // 显示变卦
+                        const futureHexagramContainer = document.getElementById('future-hexagram-container');
+                        if (data.future_hexagram) {
+                            futureHexagramContainer.style.display = 'block';
+                            // 这里需要重新计算变卦的爻象
+                            const futureYaoSymbols = data.changing_lines.reduce((symbols, line) => {
+                                const index = line - 1;
+                                symbols[index] = symbols[index].includes('━━━') ? '━  ━' : '━━━';
+                                return symbols;
+                            }, [...data.yao_symbols.map(s => s.split(' ')[0])]);
+                            
+                            document.getElementById('future-hexagram').innerHTML = 
+                                futureYaoSymbols.map(line => `<div class="hexagram-line">${line}</div>`).join('');
+                        } else {
+                            futureHexagramContainer.style.display = 'none';
+                        }
+
+                        // 显示问题（如果有）
+                        const questionGroup = document.getElementById('question-group');
+                        if (data.question) {
+                            questionGroup.style.display = 'block';
+                            document.getElementById('question-result').textContent = data.question;
+                        } else {
+                            questionGroup.style.display = 'none';
+                        }
+
+                        // 显示其他信息
+                        document.getElementById('name-result').textContent = 
+                            `${data.name}${data.future_name ? '  ' + data.future_name : ''}`;
+                        document.getElementById('meaning').textContent = data.meaning;
+                        document.getElementById('description').textContent = data.description;
+                        document.getElementById('fortune').textContent = data.fortune;
+
+                        // 显示结果区域
+                        document.getElementById('result').style.display = 'block';
+                    } else {
+                        alert('算卦失败：' + data.detail);
+                    }
+                } catch (error) {
+                    alert('请求失败：' + error.message);
+                } finally {
+                    // 隐藏加载动画
+                    document.getElementById('loading').style.display = 'none';
+                }
+            }, 3000); // 3秒后开始处理结果
+        }
+
+        // 清理定时器
+        window.onbeforeunload = function() {
+            if (animationTimeout) {
+                clearTimeout(animationTimeout);
+            }
+        };
+
+        async function getPersonalizedColor() {
+            const name = document.getElementById('color-name').value;
+            
+            try {
+                const response = await fetch(window.location.origin + '/daily-color', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name || undefined
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // 显示结果区域
+                document.getElementById('color-result').style.display = 'block';
+                
+                // 更新颜色预览
+                const colorPreview = document.getElementById('colorPreview');
+                colorPreview.style.backgroundColor = data.hex;
+                
+                // 更新颜色信息
+                document.getElementById('colorName').textContent = data.name;
+                document.getElementById('colorDescription').textContent = data.description;
+                
+                // 更新幸运指数
+                const luckBar = document.getElementById('luckBar');
+                luckBar.style.width = data.luck_index + '%';
+                document.getElementById('luckIndex').textContent = `${data.luck_index}分`;
+                
+                // 更新卦象信息
+                document.getElementById('colorHexagram').textContent = `${data.hexagram_name}卦`;
+                
+            } catch (error) {
+                console.error('获取颜色推荐失败:', error);
+                alert('获取颜色推荐失败，请稍后重试');
+            }
+        }
+
+        function switchTab(tabId) {
+            // 移除所有标签页和标签的活动状态
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 激活选中的标签页和标签
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.nav-tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        }
+
+        async function calculateHeight() {
+            const height = parseFloat(document.getElementById('height').value);
+            if (isNaN(height) || height <= 0) {
+                alert('请输入有效的身高数值');
+                return;
+            }
+
+            try {
+                const response = await fetch('/round-height', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ height: height })
+                });
+
+                const result = await response.json();
+                document.getElementById('rounded-height').textContent = result.rounded_height.toFixed(1);
+                document.getElementById('height-result').style.display = 'block';
+            } catch (error) {
+                alert('计算出错，请重试');
+                console.error('Error:', error);
+            }
+        }
+
+        // 答案之书功能
+        async function getBookAnswer() {
+            const question = document.getElementById('bookQuestion').value.trim();
+            const name = document.getElementById('bookName').value.trim();
+            const resultDiv = document.getElementById('bookResult');
+            const answerDiv = document.querySelector('.book-answer');
+            const confidenceBar = document.querySelector('.confidence-bar');
+            const suggestionDiv = document.querySelector('.suggestion');
+            const bookAnimation = document.querySelector('.book-animation');
+
+            if (!question) {
+                alert('请输入你的问题');
+                return;
+            }
+
+            // 显示加载动画
+            resultDiv.style.display = 'block';
+            answerDiv.textContent = '正在寻找答案...';
+            answerDiv.classList.remove('show');
+            suggestionDiv.classList.remove('show');
+            confidenceBar.style.width = '0%';
+            suggestionDiv.textContent = '';
+
+            // 添加书本摇晃动画
+            bookAnimation.style.animation = 'none';
+            bookAnimation.offsetHeight; // 触发重绘
+            bookAnimation.style.animation = 'shake 0.5s ease-in-out';
+
+            // 添加魔法星星效果
+            createSparkles(bookAnimation);
+
+            try {
+                const response = await fetch('/book-of-answers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        name: name || undefined
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('网络请求失败');
+                }
+
+                const data = await response.json();
+                
+                // 显示答案
+                setTimeout(() => {
+                    answerDiv.textContent = data.answer;
+                    answerDiv.classList.add('show');
+                    
+                    // 添加渐变进度条动画
+                    setTimeout(() => {
+                        confidenceBar.style.width = data.confidence + '%';
+                    }, 200);
+
+                    // 显示建议
+                    setTimeout(() => {
+                        suggestionDiv.textContent = data.suggestion;
+                        suggestionDiv.classList.add('show');
+                    }, 500);
+
+                    // 恢复书本动画
+                    bookAnimation.style.animation = 'pulse 1s infinite';
+                }, 1000);
+
+            } catch (error) {
+                answerDiv.textContent = '抱歉，发生了错误';
+                answerDiv.classList.add('show');
+                console.error('Error:', error);
+            }
+        }
+
+        // 创建魔法星星效果
+        function createSparkles(element) {
+            const numSparkles = 12;
+            const colors = ['#FFD700', '#FF69B4', '#7FFF00', '#00FFFF'];
+
+            for (let i = 0; i < numSparkles; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'magic-sparkle';
+                sparkle.style.setProperty('--tx', `${(Math.random() - 0.5) * 100}px`);
+                sparkle.style.setProperty('--ty', `${(Math.random() - 0.5) * 100}px`);
+                sparkle.style.left = '50%';
+                sparkle.style.top = '50%';
+                sparkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                sparkle.style.width = '4px';
+                sparkle.style.height = '4px';
+                sparkle.style.borderRadius = '50%';
+                
+                element.parentElement.appendChild(sparkle);
+                
+                // 动画结束后移除元素
+                sparkle.addEventListener('animationend', () => sparkle.remove());
+            }
+        }
+
+        // 添加摇晃动画
+        const shakeKeyframes = `
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }`;
+
+        const styleSheet = document.createElement("style");
+        styleSheet.textContent = shakeKeyframes;
+        document.head.appendChild(styleSheet);
+
+        // 更新标签页切换逻辑
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                // 不阻止默认行为，让链接正常工作
+                const tabId = tab.getAttribute('data-tab');
+                updateTabDisplay(tabId);
+            });
+        });
+
+        // 更新标签页显示
+        function updateTabDisplay(activeTab) {
+            // 隐藏所有内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // 显示当前标签页内容
+            if (activeTab === 'divination') {
+                document.getElementById('divinationForm').style.display = 'block';
+            } else if (activeTab === 'color') {
+                document.getElementById('colorForm').style.display = 'block';
+            } else if (activeTab === 'height') {
+                document.getElementById('heightForm').style.display = 'block';
+            } else if (activeTab === 'book') {
+                document.getElementById('bookTab').style.display = 'block';
+            }
+        }
+
+        // 初始化页面显示
+        document.addEventListener('DOMContentLoaded', () => {
+            const path = window.location.pathname;
+            let activeTab = 'divination'; // 默认标签
+            
+            if (path.includes('/color')) {
+                activeTab = 'color';
+            } else if (path.includes('/height')) {
+                activeTab = 'height';
+            } else if (path.includes('/book')) {
+                activeTab = 'book';
+            }
+            
+            updateTabDisplay(activeTab);
+        });
+    </script>
+</body>
+</html> 
